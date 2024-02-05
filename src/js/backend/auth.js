@@ -1,3 +1,5 @@
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { app } from "./setup";
 // import any set up and relevant methods from BaaS provider
 
 /**
@@ -8,14 +10,29 @@
  * @async
  */
 export async function register(email, password) {
-	try {
-		// the method used here will depend on the BaaS provider
-		const response = await methodFromVendor(email, password);
-		// assumes there is a user property on the response object
-		const { user } = response;
-		return { user };
-	} catch (error) {
-		// return the error so it can be handled in the calling function
-		return { error };
-	}
+  try {
+    // the method used here will depend on the BaaS provider
+
+    const auth = getAuth(app);
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed up
+        const user = userCredential.user;
+        console.log("user", user);
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // ..
+      });
+
+    const response = await methodFromVendor(email, password);
+    // assumes there is a user property on the response object
+    const { user } = response;
+    return { user };
+  } catch (error) {
+    // return the error so it can be handled in the calling function
+    return { error };
+  }
 }
